@@ -18,6 +18,15 @@ class CatSchema(Schema):
     name = fields.Str(required=True, error_messages={"required": "Name is required."})
     dob = fields.Date(format="%Y-%m-%d")
     favorite_toys = fields.List(fields.Str())
+    #include two more fields in the serialized output:
+    #boolean that is true if the list of favorite toys is not empty
+    likes_toys = fields.Function(lambda obj : len(obj.favorite_toys) > 0, dump_only = True)
+    #integer calculated using the date of birth and the current date
+    age = fields.Method("calculate_age", dump_only = True)
+
+    def calculate_age(self, obj):
+        today = date.today()
+        return today.year - obj.dob.year - ((today.month, today.day) < (obj.dob.month, obj.dob.day))
     
     @post_load
     def make_cat(self, data, **kwargs):
@@ -29,13 +38,18 @@ schema = CatSchema()
 cat_1 = schema.load({"name": "Meowie", "dob": "2020-11-28", "favorite_toys": ["ball", "squeaky mouse"]})
 cat_2 = schema.load({"name": "Whiskers", "dob": "2015-4-15", "favorite_toys": []})
 
+
 #serialize
 pprint(schema.dump(cat_1))
 # => {'age': 2,
 # =>  'dob': '2020-11-28',
 # =>  'favorite_toys': ['ball', 'squeaky mouse']}
+# => 'likes_toys': True,
+# =>  'name': 'Meowie'}
 
 pprint(schema.dump(cat_2))
 # => {'age': 8,
 # => 'dob': '2015-04-15',
 # => 'favorite_toys': []}
+# => 'likes_toys': False,
+# => 'name': 'Whiskers'}
