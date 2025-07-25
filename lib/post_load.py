@@ -36,3 +36,9 @@ dog = dog_schema.loads(dog_json)
 print(type(dog))             # => <class 'dict'>
 print(isinstance(dog, Dog))  # => true
 pprint(dog)                  # => <models.Dog object at 0x102c28d90>
+
+pprint(dog_schema.dumps(dog))
+dog.scold()
+pprint(dog_schema.dumps(dog))
+dog.give_treat()
+pprint(dog_schema.dumps(dog))
